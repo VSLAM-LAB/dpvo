@@ -161,3 +161,7 @@ datasets/TartanAir.pickle
 datasets/TartanAir
 TartanAirResults
 thirdparty/*
+
+# VSLAM-LAB
+install_dpvo.txt
+install_dpvo-dev.txt
