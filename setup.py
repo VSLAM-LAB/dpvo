@@ -1,4 +1,5 @@
 import os.path as osp
+import os
 from setuptools import setup, find_packages
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
@@ -9,6 +10,12 @@ ROOT = osp.dirname(osp.abspath(__file__))
 setup(
     name='dpvo',
     packages=find_packages(),
+    py_modules=['vslamlab_dpvo_mono'],
+    entry_points={
+        'console_scripts': [
+            'vslamlab_dpvo_mono = vslamlab_dpvo_mono:main',
+        ]
+    },
     ext_modules=[
         CUDAExtension('cuda_corr',
             sources=['dpvo/altcorr/correlation.cpp', 'dpvo/altcorr/correlation_kernel.cu'],
@@ -23,12 +30,16 @@ setup(
                 'nvcc': ['-O3'],
             },
             include_dirs=[
-                osp.join(ROOT, 'thirdparty/eigen-3.4.0')]
+                osp.join(os.environ["CONDA_PREFIX"], 'include/eigen3'),
+                #osp.join(os.environ["PREFIX"], 'include/eigen3')
+                ]
             ),
         CUDAExtension('lietorch_backends', 
             include_dirs=[
                 osp.join(ROOT, 'dpvo/lietorch/include'), 
-                osp.join(ROOT, 'thirdparty/eigen-3.4.0')],
+                osp.join(os.environ["CONDA_PREFIX"], 'include/eigen3'),
+                #osp.join(os.environ["PREFIX"], 'include/eigen3')
+            ],
             sources=[
                 'dpvo/lietorch/src/lietorch.cpp', 
                 'dpvo/lietorch/src/lietorch_gpu.cu',
@@ -38,4 +49,3 @@ setup(
     cmdclass={
         'build_ext': BuildExtension
     })
-
