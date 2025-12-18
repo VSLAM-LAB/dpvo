@@ -13,7 +13,6 @@ from .utils import *
 mp.set_start_method('spawn', True)
 
 
-autocast = torch.cuda.amp.autocast
 Id = SE3.Identity(1, device="cuda")
 
 
@@ -246,7 +245,7 @@ class DPVO:
         net = torch.zeros(1, len(ii), self.DIM, **self.kwargs)
         coords = self.reproject(indicies=(ii, jj, kk))
 
-        with autocast(enabled=self.cfg.MIXED_PRECISION):
+        with torch.amp.autocast('cuda', enabled=self.cfg.MIXED_PRECISION):
             corr = self.corr(coords, indicies=(kk, jj))
             ctx = self.imap[:,kk % (self.M * self.pmem)]
             net, (delta, weight, _) = \
@@ -329,7 +328,7 @@ class DPVO:
         with Timer("other", enabled=self.enable_timing):
             coords = self.reproject()
 
-            with autocast(enabled=True):
+            with torch.amp.autocast('cuda', enabled=True):
                 corr = self.corr(coords)
                 ctx = self.imap[:, self.pg.kk % (self.M * self.pmem)]
                 self.pg.net, (delta, weight, _) = \
@@ -388,7 +387,7 @@ class DPVO:
 
         image = 2 * (image[None,None] / 255.0) - 0.5
         
-        with autocast(enabled=self.cfg.MIXED_PRECISION):
+        with torch.amp.autocast('cuda', enabled=self.cfg.MIXED_PRECISION):
             fmap, gmap, imap, patches, _, clr = \
                 self.network.patchify(image,
                     patches_per_image=self.cfg.PATCHES_PER_FRAME, 
