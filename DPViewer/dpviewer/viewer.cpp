@@ -291,10 +291,10 @@ void Viewer::run() {
   }
 
   // destroy OpenGL buffers
-  // destroyVBO();
+  destroyVBO();
   running = false;
 
-  exit(1);
+  //exit(1);
 }
 
 
@@ -309,5 +309,6 @@ PYBIND11_MODULE(dpviewerx, m) {
                   const torch::Tensor,
                   const torch::Tensor>())
     .def("update_image", &Viewer::update_image)
-    .def("join", &Viewer::join);
+    .def("join", &Viewer::join)
+    .def("close", &Viewer::close);
 }

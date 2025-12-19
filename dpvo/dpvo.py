@@ -191,8 +191,11 @@ class DPVO:
         poses = poses.inv().data.cpu().numpy()
         tstamps = np.array(self.tlist, dtype=np.float64)
         if self.viewer is not None:
+            self.viewer.close()
+            import time
+            time.sleep(10)
             self.viewer.join()
-
+            
         # Poses: x y z qx qy qz qw
         return poses, tstamps
 
