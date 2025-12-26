@@ -20,7 +20,7 @@ def show_image(image, t=0):
     cv2.waitKey(t)
 
 @torch.no_grad()
-def run(cfg, network, sequence_path, rgb_csv, calibration_yaml, viz=False, timeit=False, cam_name="rgb0"):
+def run(cfg, network, sequence_path, rgb_csv, calibration_yaml, viz=False, timeit=False, cam_name="rgb_0"):
 
     slam = None
     queue = Queue(maxsize=8)
@@ -83,9 +83,9 @@ def main():
     keyframe_csv = args.exp_folder / f"{args.exp_it.zfill(5)}_KeyFrameTrajectory.csv"
     with open(keyframe_csv, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["timestamp", "tx", "ty", "tz", "qx", "qy", "qz", "qw"])
+        writer.writerow(["ts (ns)", "tx (m)", "ty (m)", "tz (m)", "qx", "qy", "qz", "qw"])
         for i in range(len(tstamps)):
-            ts = tstamps[i]
+            ts = int(tstamps[i] * 1e9)
             tx, ty, tz, qx, qy, qz, qw = poses[i]
             writer.writerow([ts, tx, ty, tz, qx, qy, qz, qw])
 

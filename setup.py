@@ -4,8 +4,8 @@ from setuptools import setup, find_packages
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
 ROOT = osp.dirname(osp.abspath(__file__))
-
-
+conda_prefix = os.environ.get("PREFIX", os.environ.get("CONDA_PREFIX", ""))
+eigen_path = osp.join(conda_prefix, 'include', 'eigen3')
 
 setup(
     name='dpvo',
@@ -30,15 +30,13 @@ setup(
                 'nvcc': ['-O3'],
             },
             include_dirs=[
-                osp.join(os.environ["CONDA_PREFIX"], 'include/eigen3'),
-                #osp.join(os.environ["PREFIX"], 'include/eigen3')
+                eigen_path
                 ]
             ),
         CUDAExtension('lietorch_backends', 
             include_dirs=[
                 osp.join(ROOT, 'dpvo/lietorch/include'), 
-                osp.join(os.environ["CONDA_PREFIX"], 'include/eigen3'),
-                #osp.join(os.environ["PREFIX"], 'include/eigen3')
+                eigen_path
             ],
             sources=[
                 'dpvo/lietorch/src/lietorch.cpp', 

@@ -36,7 +36,7 @@ _C.LOOP_CLOSE_WINDOW_SIZE = 3
 _C.LOOP_RETR_THRESH = 0.04
 
 # VSLAM-LAB
-_C.CAM_MONO = 'rgb0'
+_C.CAM_MONO = 'rgb_0'
 
 cfg = _C
 

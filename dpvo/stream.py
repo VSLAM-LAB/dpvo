@@ -48,7 +48,7 @@ def image_stream(queue, sequence_path, rgb_csv, calibration_yaml, cam_name = "rg
     df = pd.read_csv(rgb_csv)       
     
     image_list = df[f'path_{cam_name}'].to_list()
-    timestamps = df[f'ts_{cam_name} (s)'].to_list()
+    timestamps = (df[f'ts_{cam_name} (ns)'] / 1e9).to_list()
 
     # Undistort and resize images
     h = (int(h0 * np.sqrt(target_pixels / (h0 * w0))) // 32) * 32
