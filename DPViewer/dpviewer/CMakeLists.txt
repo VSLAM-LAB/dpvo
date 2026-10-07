@@ -1,5 +1,6 @@
 
 # optional libraries
+find_package(OpenGL REQUIRED)  # Pangolin's CMake config links OpenGL::OpenGL without finding it
 find_package(Pangolin REQUIRED)
 
 

@@ -165,3 +165,7 @@ thirdparty/*
 # VSLAM-LAB
 install_dpvo.txt
 install_dpvo-dev.txt
+# pixi
+.pixi/
+output/
+ORBvoc.txt*

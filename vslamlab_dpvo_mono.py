@@ -66,10 +66,18 @@ def main():
     parser.add_argument('--name', type=str, help='name your run', default='result')
     parser.add_argument('--timeit', action='store_true')
     parser.add_argument('--opts', nargs='+', default=[])
+    parser.add_argument('--loop_closure', type=int, default=1, choices=[0, 1, 2],
+                        help='0: DPVO (odometry only), 1: DPV-SLAM (proximity loop closure), '
+                             '2: DPV-SLAM++ (proximity + classic DBoW2 loop closure, needs --orb_vocab)')
+    parser.add_argument('--orb_vocab', type=Path, default=None, help='ORBvoc.txt for --loop_closure 2')
 
     args, _ = parser.parse_known_args()
 
     cfg.merge_from_file(args.settings_yaml)
+    cfg.LOOP_CLOSURE = args.loop_closure >= 1
+    cfg.CLASSIC_LOOP_CLOSURE = args.loop_closure == 2
+    if args.orb_vocab is not None:
+        cfg.ORB_VOCAB = str(args.orb_vocab)
     cfg.merge_from_list(args.opts)
 
     print("Running with config...")

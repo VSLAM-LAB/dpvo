@@ -1,0 +1,105 @@
+# Conda package definition for dpvo ([package], built by pixi-build from this repo for releases), plus a
+# development environment ([workspace]) that compiles this repo in place with `pixi run install`.
+# Release builds take their CUDA variants from variants.yaml; releases are published by CI on vX.Y tags.
+[workspace]
+authors = ["vslamlab <vslamlab@gmail.com>"]
+channels = ["https://prefix.dev/conda-forge", "https://prefix.dev/vslamlab/vslamlab"]
+name = "dpvo"
+platforms = [
+    { name = "linux-64-cuda126", platform = "linux-64", cuda = "12.6" },
+    { name = "linux-64-cuda129", platform = "linux-64", cuda = "12.9" },
+]
+version = "0.1.0"
+preview = ["pixi-build"]
+build-variants-files = ["variants.yaml"]  # CUDA variants (needs zip_keys, which the inline table lacks)
+
+# One package build per value (combined with the CUDA variants in variants.yaml)
+[workspace.build-variants]
+python = ["3.11.*"]
+
+########################################################################################################################
+# Package. Release: from a clean checkout of a tagged commit (CI does this, see .github/workflows/conda-package.yml)
+#   pixi publish --clean --target-dir output
+#   pixi upload prefix --channel vslamlab/vslamlab output/*.conda
+# Builds the cuda_corr / cuda_ba / lietorch_backends CUDA extensions plus DPViewer (dpviewerx, Pangolin) and
+# DPRetrieval (dpretrieval, with the DBoW2 submodule compiled in) through setup.py.
+[package]
+name = "dpvo"
+version = "1.0"
+description = "Deep Patch Visual Odometry/SLAM"
+authors = ["Lahav Lipson", "Zachary Teed", "Jia Deng"]
+license = "MIT"
+homepage = "https://github.com/princeton-vl/DPVO"
+repository = "https://github.com/VSLAM-LAB/dpvo"
+
+[package.build]
+backend = { name = "pixi-build-python", version = "0.*" }
+
+[package.build.config]
+noarch = false                    # compiled CUDA extensions
+compilers = ["c", "cxx", "cuda"]
+installer = "pip"
+env = { TORCH_CUDA_ARCH_LIST = "7.0;7.5;8.0;8.6;8.9;9.0+PTX" }  # else nvcc targets only the build machine's GPU
+
+[package.build-dependencies]
+ninja = "*"
+cmake = "*"
+
+[package.host-dependencies]
+python = "*"
+pip = "*"
+setuptools = "*"
+pytorch-gpu = "2.7.*"   # keep equal to the run pin below
+cuda-version = "*"      # set per build by cuda_version in variants.yaml
+cuda-cudart-dev = "*"
+libcublas-dev = "*"     # headers pulled in by ATen/cuda/CUDAContext.h
+libcusparse-dev = "*"
+libcusolver-dev = "*"
+cuda-nvrtc-dev = "*"    # Torch's CMake config (DPViewer find_package(Torch)) requires CUDA::nvrtc
+eigen = "*"             # setup.py includes $PREFIX/include/eigen3
+pybind11 = "*"          # DPViewer, DPRetrieval
+opencv = "*"            # DPRetrieval (and DBoW2) link OpenCV
+libopencv = "*"         # its run_exports pin the OpenCV version dpretrieval is linked against
+pangolin-opengl = "*"   # DPViewer
+libgl-devel = "*"       # DPViewer: find_package(OpenGL)
+libopengl-devel = "*"
+
+[package.run-dependencies]
+python = "*"
+pytorch-gpu = "2.7.*"   # the extensions are compiled against this torch ABI
+torchvision = "*"
+torch-scatter = "*"
+numpy = "*"
+opencv = "*"
+einops = "*"
+kornia = "*"
+numba = "*"
+evo = "*"
+yacs = "*"
+plyfile = "*"
+pypose = "==0.7.3"      # loop closure; https://prefix.dev/vslamlab/vslamlab (VSLAM-LAB/conda-recipes)
+tqdm = "*"
+matplotlib = "*"
+scipy = "*"
+pandas = "*"
+pillow = "*"
+pyyaml = "*"
+pangolin-opengl = "*"   # DPViewer
+libgl-devel = "*"       # DPViewer: find_package(OpenGL)
+libopengl-devel = "*"
+
+########################################################################################################################
+# Workspace: development environment (CUDA 12.9). `pixi run install` compiles the extensions in place against this
+# environment and installs the repo in editable mode; Python edits apply immediately, after editing *.cu, *.cpp or
+# the DPViewer/DPRetrieval sources run `pixi run install` again. The environment gets the [package] build/host/run
+# dependencies through [dev] (dpvo itself is not built).
+[tasks]
+install = "pip install --no-build-isolation --no-deps -e ."
+execute-mono = "vslamlab_dpvo_mono"
+test = "python -I -c 'import dpvo.dpvo, cuda_corr, cuda_ba, lietorch_backends, dpviewerx, dpretrieval, pypose; from dpviewer import Viewer; print(Viewer)' && vslamlab_dpvo_mono --help > /dev/null && echo OK"
+
+[dev]
+dpvo = { path = "." }  # installs the [package] build/host/run dependencies, not dpvo itself
+
+[dependencies]
+cuda-version = "12.9.*"

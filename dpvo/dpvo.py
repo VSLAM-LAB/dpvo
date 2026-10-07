@@ -79,12 +79,9 @@ class DPVO:
             self.start_viewer()
 
     def load_long_term_loop_closure(self):
-        try:
-            from .loop_closure.long_term import LongTermLoopClosure
-            self.long_term_lc = LongTermLoopClosure(self.cfg, self.pg)
-        except ModuleNotFoundError as e:
-            self.cfg.CLASSIC_LOOP_CLOSURE = False
-            print(f"WARNING: {e}")
+        # Fail instead of silently running without it: a run asked for the classic loop closure must use it
+        from .loop_closure.long_term import LongTermLoopClosure
+        self.long_term_lc = LongTermLoopClosure(self.cfg, self.pg)
 
     def load_weights(self, network):
         # load network from checkpoint file

@@ -34,6 +34,7 @@ _C.GLOBAL_OPT_FREQ = 15
 _C.CLASSIC_LOOP_CLOSURE = False
 _C.LOOP_CLOSE_WINDOW_SIZE = 3
 _C.LOOP_RETR_THRESH = 0.04
+_C.ORB_VOCAB = 'ORBvoc.txt'  # DBoW2 vocabulary for the classic loop closure
 
 # VSLAM-LAB
 _C.CAM_MONO = 'rgb_0'
